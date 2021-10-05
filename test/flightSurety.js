@@ -7,6 +7,7 @@ contract('Flight Surety Tests', async (accounts) => {
   var config;
   before('setup contract', async () => {
     config = await Test.Config(accounts);
+    //console.log(config);
     await config.flightSuretyData.authorizeCaller(config.flightSuretyApp.address);
   });
 
@@ -17,6 +18,8 @@ contract('Flight Surety Tests', async (accounts) => {
   it(`(multiparty) has correct initial isOperational() value`, async function () {
 
     // Get operating status
+    //console.log("check Operational");
+    //console.log(config.flightSuretyData );
     let status = await config.flightSuretyData.isOperational.call();
     assert.equal(status, true, "Incorrect initial operating status value");
 

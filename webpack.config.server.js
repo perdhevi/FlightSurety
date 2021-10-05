@@ -32,7 +32,7 @@ module.exports = {
         }),
     ],
     output: {
-        path: path.join(__dirname, 'prod/server'),
+        path: path.join(__dirname, 'build/server'),
         filename: 'server.js'
     }
 }

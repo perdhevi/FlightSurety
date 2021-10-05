@@ -89,6 +89,10 @@ contract FlightSuretyData {
         operational = mode;
     }
 
+    function authorizeCaller(address addr) external {
+        
+    }
+
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
@@ -104,6 +108,17 @@ contract FlightSuretyData {
                             external
                             pure
     {
+    }
+
+    function isAirline(
+                        address airlineAddress
+                        )
+                        public 
+                        view 
+                        returns(bool) 
+    {
+        return false;
+
     }
 
 
