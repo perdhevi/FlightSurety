@@ -11,6 +11,7 @@ contract FlightSuretyData {
 
     address private contractOwner;                                      // Account used to deploy contract
     bool private operational = true;                                    // Blocks all state changes throughout the contract if false
+    mapping(address => uint8) private airlines;
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
@@ -102,12 +103,13 @@ contract FlightSuretyData {
     *      Can only be called from FlightSuretyApp contract
     *
     */   
-    function registerAirline
-                            (   
+    function registerAirline(
+                                address airlineAddress   
                             )
                             external
-                            pure
+                            
     {
+        airlines[airlineAddress] = 1;
     }
 
     function isAirline(
@@ -117,7 +119,7 @@ contract FlightSuretyData {
                         view 
                         returns(bool) 
     {
-        return false;
+        return airlines[airlineAddress] == 1;
 
     }
 
