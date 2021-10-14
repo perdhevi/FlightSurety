@@ -12,6 +12,7 @@ contract FlightSuretyData {
     address private contractOwner;                                      // Account used to deploy contract
     bool private operational = true;                                    // Blocks all state changes throughout the contract if false
     mapping(address => uint8) private airlines;
+    uint16 private airlineCount;
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
@@ -28,6 +29,9 @@ contract FlightSuretyData {
                                 public 
     {
         contractOwner = msg.sender;
+        //set the contractOwner as the first Airline
+        airlines[contractOwner] = 1;
+        airlineCount = 1;
     }
 
     /********************************************************************************************/
