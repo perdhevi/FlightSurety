@@ -14,6 +14,9 @@ contract FlightSuretyData {
     mapping(address => uint8) private airlines;
     uint16 private airlineCount;
 
+    mapping(address => uint256) authorizedCaller;
+    mapping(address => uint256) insurances;
+
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
@@ -61,6 +64,12 @@ contract FlightSuretyData {
         _;
     }
 
+    modifier requireAuthorizedCaller()
+    {
+        require(authorizedCaller[msg.sender] == 1, "Caller is not authorized");
+        _;
+    }
+
     /********************************************************************************************/
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
@@ -94,10 +103,14 @@ contract FlightSuretyData {
         operational = mode;
     }
 
-    function authorizeCaller(address addr) external {
-        
+
+    function authorizeCaller(address addr) external requireContractOwner {
+        authorizedCaller[addr] = 1;
     }
 
+    function deauthorizeCaller(address addr) external requireContractOwner {
+        delete authorizedCaller[addr];
+    }
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
@@ -137,6 +150,7 @@ contract FlightSuretyData {
                             )
                             external
                             payable
+                            requireAuthorizedCaller
     {
 
     }
@@ -148,8 +162,10 @@ contract FlightSuretyData {
                                 (
                                 )
                                 external
-                                pure
+                                requireAuthorizedCaller
+                            
     {
+
     }
     
 
