@@ -8,14 +8,26 @@ contract FlightSuretyData {
     /********************************************************************************************/
     /*                                       DATA VARIABLES                                     */
     /********************************************************************************************/
+    uint8 private constant MIN_FOR_REGISTER = 4;
+
 
     address private contractOwner;                                      // Account used to deploy contract
     bool private operational = true;                                    // Blocks all state changes throughout the contract if false
-    mapping(address => uint8) private airlines;
-    uint16 private airlineCount;
+
+    struct Airline { 
+        address airlineAddress;
+        bool isRegistered;
+        uint256 voteCount;
+    }
+    mapping(address => Airline) private airlines;
+    uint256 private airlineCount;
+
+    mapping(address => uint256) insurances;
 
     mapping(address => uint256) authorizedCaller;
-    mapping(address => uint256) insurances;
+
+
+
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
@@ -33,7 +45,7 @@ contract FlightSuretyData {
     {
         contractOwner = msg.sender;
         //set the contractOwner as the first Airline
-        airlines[contractOwner] = 1;
+        airlines[contractOwner].isRegistered = true;
         airlineCount = 1;
     }
 
@@ -67,6 +79,15 @@ contract FlightSuretyData {
     modifier requireAuthorizedCaller()
     {
         require(authorizedCaller[msg.sender] == 1, "Caller is not authorized");
+        _;
+    }
+
+    /**
+    *   @dev the caller needs to be a registered airline
+     */
+    modifier requireAirlineRegistered()
+    {
+        require(airlines[msg.sender].isRegistered == true, 'Caller is not Registered Airline');
         _;
     }
 
@@ -125,18 +146,48 @@ contract FlightSuretyData {
                             )
                             external
                             
-    {
-        airlines[airlineAddress] = 1;
+    {        
+        if(airlineCount <= MIN_FOR_REGISTER) {
+            airlines[airlineAddress] = Airline(
+                {
+                    airlineAddress:airlineAddress,
+                    isRegistered:true,
+                    voteCount:4
+                }
+            );
+        }else{
+            airlines[airlineAddress] = Airline(
+                {
+                    airlineAddress:airlineAddress,
+                    isRegistered:false,
+                    voteCount:0
+                }
+            );            
+        }
+        airlineCount++;
     }
 
-    function isAirline(
+    function voteAirline( 
+            address airlineAddress
+        )
+        requireAirlineRegistered
+        external
+    {
+        airlines[airlineAddress].voteCount++;
+        if(airlines[airlineAddress].voteCount > (airlineCount.div(2)))
+        {
+            airlines[airlineAddress].isRegistered = true;
+        }
+    }
+
+    function isAirlineRegistered(
                         address airlineAddress
                         )
                         public 
                         view 
                         returns(bool) 
     {
-        return airlines[airlineAddress] == 1;
+        return airlines[airlineAddress].isRegistered;
 
     }
 
