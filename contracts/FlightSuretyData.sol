@@ -10,11 +10,10 @@ contract FlightSuretyData {
     /********************************************************************************************/
     uint8 private constant MIN_FOR_REGISTER = 4;
 
+    address private contractOwner; // Account used to deploy contract
+    bool private operational = true; // Blocks all state changes throughout the contract if false
 
-    address private contractOwner;                                      // Account used to deploy contract
-    bool private operational = true;                                    // Blocks all state changes throughout the contract if false
-
-    struct Airline { 
+    struct Airline {
         address airlineAddress;
         bool isRegistered;
         uint256 voteCount;
@@ -26,23 +25,15 @@ contract FlightSuretyData {
 
     mapping(address => uint256) authorizedCaller;
 
-
-
-
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
 
-
     /**
-    * @dev Constructor
-    *      The deploying account becomes contractOwner
-    */
-    constructor
-                                (
-                                ) 
-                                public 
-    {
+     * @dev Constructor
+     *      The deploying account becomes contractOwner
+     */
+    constructor() public {
         contractOwner = msg.sender;
         //set the contractOwner as the first Airline
         airlines[contractOwner].isRegistered = true;
@@ -57,37 +48,36 @@ contract FlightSuretyData {
     // before a function is allowed to be executed.
 
     /**
-    * @dev Modifier that requires the "operational" boolean variable to be "true"
-    *      This is used on all state changing functions to pause the contract in 
-    *      the event there is an issue that needs to be fixed
-    */
-    modifier requireIsOperational() 
-    {
+     * @dev Modifier that requires the "operational" boolean variable to be "true"
+     *      This is used on all state changing functions to pause the contract in
+     *      the event there is an issue that needs to be fixed
+     */
+    modifier requireIsOperational() {
         require(operational, "Contract is currently not operational");
-        _;  // All modifiers require an "_" which indicates where the function body will be added
+        _; // All modifiers require an "_" which indicates where the function body will be added
     }
 
     /**
-    * @dev Modifier that requires the "ContractOwner" account to be the function caller
-    */
-    modifier requireContractOwner()
-    {
+     * @dev Modifier that requires the "ContractOwner" account to be the function caller
+     */
+    modifier requireContractOwner() {
         require(msg.sender == contractOwner, "Caller is not contract owner");
         _;
     }
 
-    modifier requireAuthorizedCaller()
-    {
+    modifier requireAuthorizedCaller() {
         require(authorizedCaller[msg.sender] == 1, "Caller is not authorized");
         _;
     }
 
     /**
-    *   @dev the caller needs to be a registered airline
+     *   @dev the caller needs to be a registered airline
      */
-    modifier requireAirlineRegistered()
-    {
-        require(airlines[msg.sender].isRegistered == true, 'Caller is not Registered Airline');
+    modifier requireAirlineRegistered() {
+        require(
+            airlines[msg.sender].isRegistered == true,
+            "Caller is not Registered Airline"
+        );
         _;
     }
 
@@ -96,34 +86,22 @@ contract FlightSuretyData {
     /********************************************************************************************/
 
     /**
-    * @dev Get operating status of contract
-    *
-    * @return A bool that is the current operating status
-    */      
-    function isOperational() 
-                            public 
-                            view 
-                            returns(bool) 
-    {
+     * @dev Get operating status of contract
+     *
+     * @return A bool that is the current operating status
+     */
+    function isOperational() public view returns (bool) {
         return operational;
     }
 
-
     /**
-    * @dev Sets contract operations on/off
-    *
-    * When operational mode is disabled, all write transactions except for this one will fail
-    */    
-    function setOperatingStatus
-                            (
-                                bool mode
-                            ) 
-                            external
-                            requireContractOwner 
-    {
+     * @dev Sets contract operations on/off
+     *
+     * When operational mode is disabled, all write transactions except for this one will fail
+     */
+    function setOperatingStatus(bool mode) external requireContractOwner {
         operational = mode;
     }
-
 
     function authorizeCaller(address addr) external requireContractOwner {
         authorizedCaller[addr] = 1;
@@ -132,143 +110,98 @@ contract FlightSuretyData {
     function deauthorizeCaller(address addr) external requireContractOwner {
         delete authorizedCaller[addr];
     }
+
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
 
-   /**
-    * @dev Add an airline to the registration queue
-    *      Can only be called from FlightSuretyApp contract
-    *
-    */   
-    function registerAirline(
-                                address airlineAddress   
-                            )
-                            external
-                            
-    {        
-        if(airlineCount <= MIN_FOR_REGISTER) {
-            airlines[airlineAddress] = Airline(
-                {
-                    airlineAddress:airlineAddress,
-                    isRegistered:true,
-                    voteCount:4
-                }
-            );
-        }else{
-            airlines[airlineAddress] = Airline(
-                {
-                    airlineAddress:airlineAddress,
-                    isRegistered:false,
-                    voteCount:0
-                }
-            );            
-        }
+    /**
+     * @dev Add an airline to the registration queue
+     *      Can only be called from FlightSuretyApp contract
+     *
+     */
+    function registerAirline(address airlineAddress) external {
+        /*
+        if (airlineCount <= MIN_FOR_REGISTER) {
+            airlines[airlineAddress] = Airline({
+                airlineAddress: airlineAddress,
+                isRegistered: true,
+                voteCount: 4
+            });
+        } else {
+            airlines[airlineAddress] = Airline({
+                airlineAddress: airlineAddress,
+                isRegistered: false,
+                voteCount: 0
+            });
+        }*/
+        airlines[airlineAddress] = Airline({
+            airlineAddress: airlineAddress,
+            isRegistered: true,
+            voteCount: 4
+        });
         airlineCount++;
     }
 
-    function voteAirline( 
-            address airlineAddress
-        )
-        requireAirlineRegistered
+    function voteAirline(address airlineAddress)
         external
+        requireAirlineRegistered
     {
         airlines[airlineAddress].voteCount++;
-        if(airlines[airlineAddress].voteCount > (airlineCount.div(2)))
-        {
+        if (airlines[airlineAddress].voteCount > (airlineCount.div(2))) {
             airlines[airlineAddress].isRegistered = true;
         }
     }
 
-    function isAirlineRegistered(
-                        address airlineAddress
-                        )
-                        public 
-                        view 
-                        returns(bool) 
+    function isAirlineRegistered(address airlineAddress)
+        public
+        view
+        returns (bool)
     {
         return airlines[airlineAddress].isRegistered;
-
     }
 
-
-   /**
-    * @dev Buy insurance for a flight
-    *
-    */   
-    function buy
-                            (                             
-                            )
-                            external
-                            payable
-                            requireAuthorizedCaller
-    {
-
+    function countAirlines() public view returns (uint256 count) {
+        return airlineCount;
     }
 
     /**
-     *  @dev Credits payouts to insurees
-    */
-    function creditInsurees
-                                (
-                                )
-                                external
-                                requireAuthorizedCaller
-                            
-    {
+     * @dev Buy insurance for a flight
+     *
+     */
+    function buy() external payable requireAuthorizedCaller {}
 
-    }
-    
+    /**
+     *  @dev Credits payouts to insurees
+     */
+    function creditInsurees() external requireAuthorizedCaller {}
 
     /**
      *  @dev Transfers eligible payout funds to insuree
      *
-    */
-    function pay
-                            (
-                            )
-                            external
-                            pure
-    {
-    }
+     */
+    function pay() external pure {}
 
-   /**
-    * @dev Initial funding for the insurance. Unless there are too many delayed flights
-    *      resulting in insurance payouts, the contract should be self-sustaining
-    *
-    */   
-    function fund
-                            (   
-                            )
-                            public
-                            payable
-    {
-    }
+    /**
+     * @dev Initial funding for the insurance. Unless there are too many delayed flights
+     *      resulting in insurance payouts, the contract should be self-sustaining
+     *
+     */
+    function fund() public payable {}
 
-    function getFlightKey
-                        (
-                            address airline,
-                            string memory flight,
-                            uint256 timestamp
-                        )
-                        pure
-                        internal
-                        returns(bytes32) 
-    {
+    function getFlightKey(
+        address airline,
+        string memory flight,
+        uint256 timestamp
+    ) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(airline, flight, timestamp));
     }
 
     /**
-    * @dev Fallback function for funding smart contract.
-    *
-    */
-    function() 
-                            external 
-                            payable 
-    {
+     * @dev Fallback function for funding smart contract.
+     *
+     */
+    function() external payable {
         fund();
     }
-
-
 }
-
