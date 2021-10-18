@@ -9,6 +9,7 @@ contract('Oracles', async (accounts) => {
   console.log(accounts);
   before('setup contract', async () => {
     config = await Test.Config(accounts);
+    
 
     // Watch contract events
     const STATUS_CODE_UNKNOWN = 0;
@@ -41,10 +42,16 @@ contract('Oracles', async (accounts) => {
     let flight = 'ND1309'; // Course number
     let timestamp = Math.floor(Date.now() / 1000);
 
+    await config.flightSuretyApp.OracleRequest({},function(err, log) {
+      console.log("OracleRequest emitted");
+      console.log(err); 
+      console.log(log);  
+    });
+
+
     // Submit a request for oracles to get status information for a flight
     await config.flightSuretyApp.fetchFlightStatus(config.firstAirline, flight, timestamp);
     // ACT
-
     // Since the Index assigned to each test account is opaque by design
     // loop through all the accounts and for each account, all its Indexes (indices?)
     // and submit a response. The contract will reject a submission if it was
@@ -53,6 +60,7 @@ contract('Oracles', async (accounts) => {
 
       // Get oracle information
       let oracleIndexes = await config.flightSuretyApp.getMyIndexes.call({ from: accounts[a]});
+      //console.log(oracleIndexes);
       for(let idx=0;idx<3;idx++) {
 
         try {

@@ -5,6 +5,7 @@ pragma solidity ^0.5.0;
 // More info: https://www.nccgroup.trust/us/about-us/newsroom-and-events/blog/2018/november/smart-contract-insecurity-bad-arithmetic/
 
 import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "./FlightSuretyData.sol";
 
 /************************************************** */
 /* FlightSurety Smart Contract                      */
@@ -341,7 +342,7 @@ contract FlightSuretyApp {
 
     // endregion
 }
-
+/*
 contract FlightSuretyData {
     function isAirline(address airlineAddress) public view returns (bool);
 
@@ -349,3 +350,4 @@ contract FlightSuretyData {
 
     function countAirlines() public view returns (uint256 count);
 }
+*/

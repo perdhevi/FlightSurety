@@ -11,5 +11,6 @@ if (module.hot) {
   server.removeListener('request', currentApp)
   server.on('request', app)
   currentApp = app
+  console.log("app listener startd");
  })
 }
