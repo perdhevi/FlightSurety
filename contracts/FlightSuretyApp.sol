@@ -124,6 +124,14 @@ contract FlightSuretyApp {
         }
     }
 
+    function voteAirline(address airlineAddress) external {
+        uint256 airlineCount = flightSuretyData.countAirlines();
+        votes[airlineAddress]++;
+        if (votes[airlineAddress] > airlineCount.div(2)) {
+            flightSuretyData.registerAirline(airlineAddress);
+        }
+    }
+
     /**
      * @dev Register a future flight for insuring.
      *
