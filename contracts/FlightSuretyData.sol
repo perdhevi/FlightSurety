@@ -17,10 +17,15 @@ contract FlightSuretyData {
         address airlineAddress;
         bool isRegistered;
         uint256 voteCount;
+        uint256 fundDeposit;
     }
     mapping(address => Airline) private airlines;
     uint256 private airlineCount;
 
+    struct Insurance {
+        address passangerAddress;
+        uint256 insuranceFee;
+    }
     mapping(address => uint256) insurances;
 
     mapping(address => uint256) authorizedCaller;
@@ -121,43 +126,26 @@ contract FlightSuretyData {
      *
      */
     function registerAirline(address airlineAddress) external {
-        /*
-        if (airlineCount <= MIN_FOR_REGISTER) {
-            airlines[airlineAddress] = Airline({
-                airlineAddress: airlineAddress,
-                isRegistered: true,
-                voteCount: 4
-            });
-        } else {
-            airlines[airlineAddress] = Airline({
-                airlineAddress: airlineAddress,
-                isRegistered: false,
-                voteCount: 0
-            });
-        }*/
         airlines[airlineAddress] = Airline({
             airlineAddress: airlineAddress,
             isRegistered: true,
-            voteCount: 4
+            voteCount: 4,
+            fundDeposit: 0
         });
         airlineCount++;
     }
 
-    function voteAirline(address airlineAddress)
-        external
-        requireAirlineRegistered
-    {
-        airlines[airlineAddress].voteCount++;
-        if (airlines[airlineAddress].voteCount > (airlineCount.div(2))) {
-            airlines[airlineAddress].isRegistered = true;
-        }
-    }
+    // function voteAirline(address airlineAddress)
+    //     external
+    //     requireAirlineRegistered
+    // {
+    //     airlines[airlineAddress].voteCount++;
+    //     if (airlines[airlineAddress].voteCount > (airlineCount.div(2))) {
+    //         airlines[airlineAddress].isRegistered = true;
+    //     }
+    // }
 
-    function isAirlineRegistered(address airlineAddress)
-        public
-        view
-        returns (bool)
-    {
+    function isAirline(address airlineAddress) public view returns (bool) {
         return airlines[airlineAddress].isRegistered;
     }
 
@@ -187,7 +175,9 @@ contract FlightSuretyData {
      *      resulting in insurance payouts, the contract should be self-sustaining
      *
      */
-    function fund() public payable {}
+    function fund() public payable requireAirlineRegistered {
+        airlines[msg.sender].fundDeposit.add(msg.value);
+    }
 
     function getFlightKey(
         address airline,

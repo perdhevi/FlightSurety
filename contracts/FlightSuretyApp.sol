@@ -64,6 +64,11 @@ contract FlightSuretyApp {
         _;
     }
 
+    modifier requireFunds() {
+        require(msg.value > 0, "Fund must be provided");
+        _;
+    }
+
     /********************************************************************************************/
     /*                                       CONSTRUCTOR                                        */
     /********************************************************************************************/
@@ -72,9 +77,9 @@ contract FlightSuretyApp {
      * @dev Contract constructor
      *
      */
-    constructor(address dataContract) public {
+    constructor() public {
         contractOwner = msg.sender;
-        flightSuretyData = FlightSuretyData(dataContract);
+        //flightSuretyData = FlightSuretyData(dataContract);
     }
 
     /********************************************************************************************/
@@ -95,10 +100,12 @@ contract FlightSuretyApp {
      */
     function registerAirline(address airlineAddress)
         external
+        payable
+        requireFunds
         returns (bool success, uint256 votesCurrently)
     {
         //if the airline is already registered then just return ok
-        if (flightSuretyData.isAirlineRegistered(airlineAddress)) {
+        if (flightSuretyData.isAirline(airlineAddress)) {
             return (true, 0);
         } else {
             uint256 airlineCount = flightSuretyData.countAirlines();
@@ -121,7 +128,9 @@ contract FlightSuretyApp {
      * @dev Register a future flight for insuring.
      *
      */
-    function registerFlight() external pure {}
+    function registerFlight() external pure {
+        //TODO
+    }
 
     /**
      * @dev Called after oracle has updated flight status
@@ -132,7 +141,9 @@ contract FlightSuretyApp {
         string memory flight,
         uint256 timestamp,
         uint8 statusCode
-    ) internal pure {}
+    ) internal pure {
+        //TODO
+    }
 
     // Generate a request for oracles to fetch flight information
     function fetchFlightStatus(
@@ -324,10 +335,7 @@ contract FlightSuretyApp {
 }
 
 contract FlightSuretyData {
-    function isAirlineRegistered(address airlineAddress)
-        public
-        view
-        returns (bool);
+    function isAirline(address airlineAddress) public view returns (bool);
 
     function registerAirline(address airlineAddress) external;
 
