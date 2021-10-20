@@ -135,10 +135,18 @@ contract FlightSuretyApp {
 
     /**
      * @dev Register a future flight for insuring.
-     *
+     *  The airline needs to register the flight
      */
-    function registerFlight() external pure {
-        //TODO
+    function registerFlight(string calldata flightCode, uint256 timestamp)
+        external
+        returns (bytes32)
+    {
+        bytes32 flightKey = flightSuretyData.registerFlight(
+            msg.sender,
+            flightCode,
+            timestamp
+        );
+        return flightKey;
     }
 
     /**
@@ -150,8 +158,11 @@ contract FlightSuretyApp {
         string memory flight,
         uint256 timestamp,
         uint8 statusCode
-    ) internal pure {
+    ) internal {
         //TODO
+        if (statusCode == STATUS_CODE_LATE_AIRLINE) {
+            flightSuretyData.creditInsurees(airline, flight, timestamp);
+        }
     }
 
     // Generate a request for oracles to fetch flight information

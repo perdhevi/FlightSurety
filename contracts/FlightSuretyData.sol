@@ -19,6 +19,7 @@ contract FlightSuretyData {
         bool isRegistered;
         uint256 voteCount;
         uint256 fundDeposit;
+        bool processing;
     }
     mapping(address => Airline) private airlines;
     uint256 private airlineCount;
@@ -36,8 +37,17 @@ contract FlightSuretyData {
         address passangerAddress;
         uint256 insuranceFee;
         bytes32 flightKey;
+        bool isProcessed;
+        uint256 timestamp;
     }
     mapping(address => Insurance) insurances;
+
+    struct FlightInsuree {
+        mapping(uint8 => address) passengers;
+        uint8 passengersCount;
+    }
+
+    mapping(string => FlightInsuree) private insuree;
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
@@ -100,6 +110,12 @@ contract FlightSuretyData {
         _;
     }
 
+    modifier requireNotProcessing(address airlineAddress) {
+        Airline memory airline = airlines[airlineAddress];
+        require(airline.processing == false, "airline is being processed");
+        _;
+    }
+
     /********************************************************************************************/
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
@@ -144,7 +160,8 @@ contract FlightSuretyData {
             airlineAddress: airlineAddress,
             isRegistered: true,
             voteCount: 4,
-            fundDeposit: 0
+            fundDeposit: 0,
+            processing: false
         });
         airlineCount++;
     }
@@ -163,19 +180,64 @@ contract FlightSuretyData {
      */
     function buy(string calldata flightNumber) external payable {
         bytes32 flightKey = flightKeys[flightNumber];
-        insurances[msg.sender] = Insurance(msg.sender, msg.value, flightKey);
+        insurances[msg.sender] = Insurance(
+            msg.sender,
+            msg.value,
+            flightKey,
+            false,
+            0
+        );
+        uint8 count = insuree[flightNumber].passengersCount;
+        insuree[flightNumber].passengers[count] = msg.sender; //let's use 0 index
+        insuree[flightNumber].passengersCount++;
     }
 
     /**
      *  @dev Credits payouts to insurees
      */
-    function creditInsurees() external {}
+    function creditInsurees(
+        address airlineAddress,
+        string calldata flightNumber,
+        uint256 timestamp
+    ) external requireNotProcessing(airlineAddress) {
+        Airline storage airline = airlines[airlineAddress];
+        airline.processing = true;
+        uint8 count = insuree[flightNumber].passengersCount;
+        uint256 totalCredit = 0;
+        for (uint8 idx = 0; idx < count; idx++) {
+            address passengerAddress = insuree[flightNumber].passengers[idx];
+            Insurance storage insurance = insurances[passengerAddress];
+            uint256 origFee = insurance.insuranceFee;
+            uint256 insure = origFee / 2;
+            insurance.insuranceFee = origFee + insure;
+            insurance.isProcessed = true;
+            insurance.timestamp = timestamp;
+            totalCredit = totalCredit + insure;
+        }
+        //deduct deposit from airlines
+
+        airline.fundDeposit = airline.fundDeposit - totalCredit;
+        airline.processing = false;
+    }
 
     /**
      *  @dev Transfers eligible payout funds to insuree
      *
      */
-    function pay() external pure {}
+    function pay() external payable {
+        require(
+            insurances[msg.sender].insuranceFee > 0,
+            "sender doesn't have any balance in insurance fee"
+        );
+
+        uint256 balance = insurances[msg.sender].insuranceFee;
+        insurances[msg.sender].insuranceFee = 0;
+        msg.sender.transfer(balance);
+    }
+
+    function getInsuranceBalance() public view returns (uint256) {
+        return insurances[msg.sender].insuranceFee;
+    }
 
     /**
      * @dev Initial funding for the insurance. Unless there are too many delayed flights
@@ -195,7 +257,19 @@ contract FlightSuretyData {
         flights[flightKey] = Flight(airlineAddress, flightCode, timestamp, 0);
         flightKeys[flightCode] = flightKey;
 
+        FlightInsuree storage fi = insuree[flightCode];
+        fi.passengersCount = 0;
+
         return flightKey;
+    }
+
+    function getFlightAirline(string memory flightCode)
+        public
+        view
+        returns (address)
+    {
+        bytes32 flightKey = flightKeys[flightCode];
+        return flights[flightKey].airlineAddress;
     }
 
     function getFlightKey(

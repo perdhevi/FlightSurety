@@ -92,6 +92,39 @@ contract('Flight Surety Tests', async (accounts) => {
     assert.equal(result, false, "Airline should not be able to register another airline if it hasn't provided funding");
 
   });
+
+  it('can register Flight', async() => {
+    await config.flightSuretyData.registerFlight(
+        config.firstAirline,
+        'ND101',
+        Date.now());
+    let address = await config.flightSuretyData.getFlightAirline('ND101');
+
+    assert.equal(config.firstAirline == address, true, 'Airlne address should match after registration');
+    
+  });
+
+  it('can buy and pay insurance', async() => {
+    var BN = web3.utils.BN;
+    let beforeBuy = await web3.eth.getBalance(accounts[3]);
+    console.log('before buy', beforeBuy);
+
+    await config.flightSuretyData.buy('ND101', {from: accounts[3], value : 1000});
+    let afterBuy = await web3.eth.getBalance(accounts[3]);
+    console.log('after buy ', afterBuy);
+
+    let aBal = await config.flightSuretyData.getInsuranceBalance.call({from: accounts[3]});
+    console.log('aBal ', aBal.toString());
+    await config.flightSuretyData.pay({from: accounts[3]});
+    let bBal = await config.flightSuretyData.getInsuranceBalance.call({from: accounts[3]});
+    
+
+    let actualBal = await web3.eth.getBalance(accounts[3]);
+    console.log(' after pay', actualBal);
+
+    assert.equal(aBal > 0,true,'Insurance Fee Deposited should be more than 0');
+    assert.equal(bBal == 0,true,'Insurance Fee Deposited should be 0');
+  })
  
 
 });
