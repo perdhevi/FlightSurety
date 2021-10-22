@@ -1,6 +1,7 @@
 
 var Test = require('../config/testConfig.js');
 var BigNumber = require('bignumber.js');
+const { default: Web3 } = require('web3');
 
 contract('Flight Surety Tests', async (accounts) => {
 
@@ -81,7 +82,7 @@ contract('Flight Surety Tests', async (accounts) => {
 
     // ACT
     try {
-        await config.flightSuretyApp.registerAirline(newAirline, {from: config.firstAirline});
+        await config.flightSuretyApp.registerAirline(newAirline, {from: config.owner});
     }
     catch(e) {
 
@@ -92,8 +93,25 @@ contract('Flight Surety Tests', async (accounts) => {
     assert.equal(result[1], false, "Airline should not be able to register another airline if it hasn't provided funding");
 
   });
+  
+  it('airline can add fund', async() => {
+    let fundValue = web3.utils.toWei("1","ether");
+    await config.flightSuretyData.fund({from:config.owner, value:fundValue, gas:0})
+    //console.log('fund Value',fundValue);
+    let result = await config.flightSuretyData.getAirlineFund.call(config.owner);
+    //console.log('fund ',result.toString());
+    assert.equal(result==fundValue, true, "deposited fund must be the same");
+  });
 
-  it('can register Flight', async() => {
+  it('airline can add register airline', async() => {
+    await config.flightSuretyData.addAirline(config.firstAirline, {from:config.owner});
+
+    let result = await config.flightSuretyData.isAirline(config.firstAirline);
+
+    assert.equal(result[1], true, "Airline can register another airline");
+  });
+
+  it('airline can register Flight', async() => {
     await config.flightSuretyData.registerFlight(
         config.firstAirline,
         'ND101',
@@ -120,7 +138,7 @@ contract('Flight Surety Tests', async (accounts) => {
     
 
     let actualBal = await web3.eth.getBalance(accounts[3]);
-    console.log(' after pay', actualBal);
+    //console.log(' after pay', actualBal);
 
     assert.equal(aBal > 0,true,'Insurance Fee Deposited should be more than 0');
     assert.equal(bBal == 0,true,'Insurance Fee Deposited should be 0');

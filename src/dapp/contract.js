@@ -50,11 +50,17 @@ export default class Contract {
             .call({from: self.owner} ,callback);
     }
 
-    registerAirline(fromAddress, airlineAddress, cost, callback){
+    registerAirline(fromAddress, airlineAddress, callback){
         let self = this;
         self.flightSuretyApp.methods
             .registerAirline(airlineAddress)
-            .call({from:fromAddress, value:cost}, callback);
+            .send({from:fromAddress}, callback);
+    }
+
+    airlineFund(fromAddress, amount, callback) {
+        self.flightSuretyData.methods
+            .fund()
+            .send({from:fromAddress, value:amount}, callback)
     }
 
     fetchFlightStatus(flight, callback) {

@@ -101,15 +101,15 @@ contract FlightSuretyApp {
      *
      */
     function registerAirline(address airlineAddress)
-        external
-        payable
-        requireFunds
-        returns (bool success, uint256 votesCurrently)
+        public
+        returns (bool, uint256)
     {
+        /*
         require(
             flightSuretyData.getAirlineFund(msg.sender) > 0,
             "Registering airline must have fund"
         );
+        */
         //if the airline is already registered then just return ok
         (address addr, bool status) = flightSuretyData.isAirline(
             airlineAddress
@@ -117,16 +117,19 @@ contract FlightSuretyApp {
         if (status == true) {
             return (true, 0);
         } else {
+            //flightSuretyData.addAirline(airlineAddress);
+            //return true;
+
             uint256 airlineCount = flightSuretyData.countAirlines();
             if (airlineCount <= 4) {
-                flightSuretyData.registerAirline(airlineAddress);
+                flightSuretyData.addAirline(airlineAddress);
 
                 return (true, 0);
             } else {
                 votes[airlineAddress]++;
                 //fundDeposited[airlineAddress] = msg.value;
                 if (votes[airlineAddress] > airlineCount.div(2)) {
-                    flightSuretyData.registerAirline(airlineAddress);
+                    flightSuretyData.addAirline(airlineAddress);
                     return (true, 0);
                 } else {
                     return (false, votes[airlineAddress]);
@@ -139,7 +142,7 @@ contract FlightSuretyApp {
         uint256 airlineCount = flightSuretyData.countAirlines();
         votes[airlineAddress]++;
         if (votes[airlineAddress] > airlineCount.div(2)) {
-            flightSuretyData.registerAirline(airlineAddress);
+            flightSuretyData.addAirline(airlineAddress);
         }
     }
 

@@ -16,11 +16,15 @@ import Web3 from 'web3';
             console.log(error,result);
             display('Operational Status', 'Check if contract is operational', [ { label: 'Operational Status', error: error, value: result} ]);
         });
+
+        contract.airlineFund(contract.owner,web3.utils.toWei("1","ether"), (error, result) => {
+            display('Airline', 'Add Fund', [ { label: 'fund airline', error: error, value: result} ]);
+        });
     
-        contract.registerAirline(contract.owner, contract.airlines[1], 1, (error, result) =>{
+        contract.registerAirline(contract.owner, contract.airlines[1], (error, result) =>{
             display('Airline', 'Register Airline', [ { label: 'register airline', error: error, value: result} ]);
 
-        })
+        });
 
         // User-submitted transaction
         DOM.elid('submit-oracle').addEventListener('click', () => {
