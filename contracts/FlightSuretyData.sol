@@ -166,8 +166,12 @@ contract FlightSuretyData {
         airlineCount++;
     }
 
-    function isAirline(address airlineAddress) public view returns (bool) {
-        return airlines[airlineAddress].isRegistered;
+    function isAirline(address airlineAddress)
+        public
+        view
+        returns (address, bool)
+    {
+        return (airlineAddress, airlines[airlineAddress].isRegistered);
     }
 
     function countAirlines() public view returns (uint256 count) {
@@ -246,6 +250,14 @@ contract FlightSuretyData {
      */
     function fund() public payable requireAirlineRegistered {
         airlines[msg.sender].fundDeposit.add(msg.value);
+    }
+
+    function getAirlineFund(address airlineAddress)
+        public
+        view
+        returns (uint256)
+    {
+        return airlines[airlineAddress].fundDeposit;
     }
 
     function registerFlight(

@@ -107,14 +107,14 @@ contract('Flight Surety Tests', async (accounts) => {
   it('can buy and pay insurance', async() => {
     var BN = web3.utils.BN;
     let beforeBuy = await web3.eth.getBalance(accounts[3]);
-    console.log('before buy', beforeBuy);
+    //console.log('before buy', beforeBuy);
 
     await config.flightSuretyData.buy('ND101', {from: accounts[3], value : 1000});
     let afterBuy = await web3.eth.getBalance(accounts[3]);
-    console.log('after buy ', afterBuy);
+    //console.log('after buy ', afterBuy);
 
     let aBal = await config.flightSuretyData.getInsuranceBalance.call({from: accounts[3]});
-    console.log('aBal ', aBal.toString());
+    //console.log('aBal ', aBal.toString());
     await config.flightSuretyData.pay({from: accounts[3]});
     let bBal = await config.flightSuretyData.getInsuranceBalance.call({from: accounts[3]});
     

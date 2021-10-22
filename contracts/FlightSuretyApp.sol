@@ -38,6 +38,7 @@ contract FlightSuretyApp {
     mapping(bytes32 => Flight) private flights;
 
     mapping(address => uint256) private votes;
+    mapping(address => uint256) private fundDeposited;
 
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
@@ -105,16 +106,25 @@ contract FlightSuretyApp {
         requireFunds
         returns (bool success, uint256 votesCurrently)
     {
+        require(
+            flightSuretyData.getAirlineFund(msg.sender) > 0,
+            "Registering airline must have fund"
+        );
         //if the airline is already registered then just return ok
-        if (flightSuretyData.isAirline(airlineAddress)) {
+        (address addr, bool status) = flightSuretyData.isAirline(
+            airlineAddress
+        );
+        if (status == true) {
             return (true, 0);
         } else {
             uint256 airlineCount = flightSuretyData.countAirlines();
             if (airlineCount <= 4) {
                 flightSuretyData.registerAirline(airlineAddress);
+
                 return (true, 0);
             } else {
                 votes[airlineAddress]++;
+                //fundDeposited[airlineAddress] = msg.value;
                 if (votes[airlineAddress] > airlineCount.div(2)) {
                     flightSuretyData.registerAirline(airlineAddress);
                     return (true, 0);
