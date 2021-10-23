@@ -58,6 +58,7 @@ export default class Contract {
     }
 
     airlineFund(fromAddress, amount, callback) {
+        let self = this;
         self.flightSuretyData.methods
             .fund()
             .send({from:fromAddress, value:amount}, callback)

@@ -22,7 +22,9 @@ contract('Flight Surety Tests', async (accounts) => {
     //console.log("check Operational");
     //console.log(config.flightSuretyData );
     let status = await config.flightSuretyData.isOperational.call();
-    assert.equal(status, true, "Incorrect initial operating status value");
+    assert.equal(status, true, "Incorrect initial data operating status value");
+    let statusApp = await config.flightSuretyApp.isOperational.call();
+    assert.equal(statusApp, true, "Incorrect initial app operating status value");
 
   });
 
@@ -95,18 +97,19 @@ contract('Flight Surety Tests', async (accounts) => {
   });
   
   it('airline can add fund', async() => {
-    let fundValue = web3.utils.toWei("1","ether");
-    await config.flightSuretyData.fund({from:config.owner, value:fundValue, gas:0})
+    let fundValue =100;// web3.utils.toWei("1","ether");
+    await config.flightSuretyData.fund({from:config.owner, value:fundValue});
     //console.log('fund Value',fundValue);
     let result = await config.flightSuretyData.getAirlineFund.call(config.owner);
     //console.log('fund ',result.toString());
-    assert.equal(result==fundValue, true, "deposited fund must be the same");
+    assert.equal(result==fundValue, true, "deposited fund must be the same "+fundValue.toString() + " == "+ result.toString());
   });
 
   it('airline can add register airline', async() => {
-    await config.flightSuretyData.addAirline(config.firstAirline, {from:config.owner});
+    let airlineAddress = config.testAddresses[4];
+    let addResult = await config.flightSuretyApp.registerAirline(airlineAddress, {from:config.owner});
 
-    let result = await config.flightSuretyData.isAirline(config.firstAirline);
+    let result = await config.flightSuretyData.isAirline(airlineAddress);
 
     assert.equal(result[1], true, "Airline can register another airline");
   });

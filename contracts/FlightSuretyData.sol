@@ -155,13 +155,13 @@ contract FlightSuretyData {
      *      Can only be called from FlightSuretyApp contract
      *
      */
-    function addAirline(address airlineAddress) external {
+    function addAirline(address airlineAddress, uint256 voteCount) external {
         Airline storage airline = airlines[airlineAddress];
 
         airline.airlineAddress = airlineAddress;
 
         airline.isRegistered = true;
-        airline.voteCount = 4;
+        airline.voteCount = voteCount;
         airline.fundDeposit = 0;
         airline.processing = false;
 
@@ -250,9 +250,10 @@ contract FlightSuretyData {
      *      resulting in insurance payouts, the contract should be self-sustaining
      *
      */
-    function fund() public payable requireAirlineRegistered {
+    function fund() external payable requireAirlineRegistered {
         Airline storage airline = airlines[msg.sender];
-        airline.fundDeposit = airline.fundDeposit.add(msg.value);
+        uint256 curFund = airline.fundDeposit;
+        airline.fundDeposit = curFund.add(msg.value);
     }
 
     function getAirlineFund(address airlineAddress)
@@ -300,6 +301,7 @@ contract FlightSuretyData {
      *
      */
     function() external payable {
-        fund();
+        Airline storage airline = airlines[msg.sender];
+        airline.fundDeposit = airline.fundDeposit.add(msg.value);
     }
 }

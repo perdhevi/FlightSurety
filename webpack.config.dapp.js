@@ -5,7 +5,8 @@ module.exports = {
   entry: ['babel-polyfill', path.join(__dirname, "src/dapp")],
   output: {
     path: path.join(__dirname, "prod/dapp"),
-    filename: "bundle.js"
+    filename: "bundle.js",
+    sourceMapFilename: "[name].js.map"
   },
   module: {
     rules: [
@@ -19,7 +20,7 @@ module.exports = {
         use: ["style-loader", "css-loader"]
       },
       {
-        test: /\.(png|svg|jpg|gif)$/,
+        test: /\.(png|svg|jpg|gif|ico)$/,
         use: [
           'file-loader'
         ]
@@ -33,12 +34,14 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({ 
-      template: path.join(__dirname, "src/dapp/index.html")
+      template: path.join(__dirname, "src/dapp/index.html"),
+      favicon: "./src/dapp/favicon.ico"
     })
   ],
   resolve: {
     extensions: [".js"]
   },
+  devtool: 'inline-source-map',
   devServer: {
     contentBase: path.join(__dirname, "dapp"),
     port: 8000,

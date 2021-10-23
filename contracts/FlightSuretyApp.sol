@@ -100,26 +100,24 @@ contract FlightSuretyApp {
      * @dev Add an airline to the registration queue
      *
      */
-    function registerAirline(address airlineAddress)
-        public
-        returns (bool, uint256)
-    {
-        /*
+    function registerAirline(address airlineAddress) external returns (bool) {
+        flightSuretyData.addAirline(airlineAddress,0);
+        return true;
+    }
+
+    /*
         require(
             flightSuretyData.getAirlineFund(msg.sender) > 0,
             "Registering airline must have fund"
         );
         */
-        //if the airline is already registered then just return ok
-        (address addr, bool status) = flightSuretyData.isAirline(
-            airlineAddress
-        );
-        if (status == true) {
-            return (true, 0);
-        } else {
-            //flightSuretyData.addAirline(airlineAddress);
-            //return true;
+    //if the airline is already registered then just return ok
+    // (address addr, bool status) = flightSuretyData.isAirline(airlineAddress);
+    // if (status == true) {
+    //     return (true, 0);
+    // } else {
 
+    /*
             uint256 airlineCount = flightSuretyData.countAirlines();
             if (airlineCount <= 4) {
                 flightSuretyData.addAirline(airlineAddress);
@@ -135,8 +133,9 @@ contract FlightSuretyApp {
                     return (false, votes[airlineAddress]);
                 }
             }
-        }
-    }
+*/
+    //}
+    //}
 
     function voteAirline(address airlineAddress) external {
         uint256 airlineCount = flightSuretyData.countAirlines();
