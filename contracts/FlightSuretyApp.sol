@@ -101,7 +101,7 @@ contract FlightSuretyApp {
      *
      */
     function registerAirline(address airlineAddress) external returns (bool) {
-        flightSuretyData.addAirline(airlineAddress,0);
+        flightSuretyData.addAirline(airlineAddress, 0);
         return true;
     }
 
@@ -141,7 +141,7 @@ contract FlightSuretyApp {
         uint256 airlineCount = flightSuretyData.countAirlines();
         votes[airlineAddress]++;
         if (votes[airlineAddress] > airlineCount.div(2)) {
-            flightSuretyData.addAirline(airlineAddress);
+            flightSuretyData.addAirline(airlineAddress, votes[airlineAddress]);
         }
     }
 
