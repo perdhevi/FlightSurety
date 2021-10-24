@@ -5,7 +5,7 @@ pragma solidity ^0.5.0;
 // More info: https://www.nccgroup.trust/us/about-us/newsroom-and-events/blog/2018/november/smart-contract-insecurity-bad-arithmetic/
 
 import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "./FlightSuretyData.sol";
+//import "./FlightSuretyData.sol";
 
 /************************************************** */
 /* FlightSurety Smart Contract                      */
@@ -79,9 +79,9 @@ contract FlightSuretyApp {
      * @dev Contract constructor
      *
      */
-    constructor() public {
+    constructor(address dataContract) public {
         contractOwner = msg.sender;
-        //flightSuretyData = FlightSuretyData(dataContract);
+        flightSuretyData = FlightSuretyData(dataContract);
     }
 
     /********************************************************************************************/
@@ -101,15 +101,35 @@ contract FlightSuretyApp {
      *
      */
     function registerAirline(address airlineAddress) external returns (bool) {
-        flightSuretyData.addAirline(airlineAddress, 0);
-        return true;
-    }
-
-    /*
         require(
             flightSuretyData.getAirlineFund(msg.sender) > 0,
             "Registering airline must have fund"
         );
+        // flightSuretyData.addAirline(airlineAddress, 0);
+        // return true;
+    (address addr, bool status) = flightSuretyData.isAirline(airlineAddress);
+    if (status == true) {
+        return true;
+    } else {
+            uint256 airlineCount = flightSuretyData.countAirlines();
+            if (airlineCount <= 4) {
+                flightSuretyData.addAirline(airlineAddress,0);
+
+                return true;
+            } else {
+                votes[airlineAddress]++;
+                //fundDeposited[airlineAddress] = msg.value;
+                if (votes[airlineAddress] > airlineCount.div(2)) {
+                    flightSuretyData.addAirline(airlineAddress, votes[airlineAddress]);
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
+    }
+
+    /*
         */
     //if the airline is already registered then just return ok
     // (address addr, bool status) = flightSuretyData.isAirline(airlineAddress);
@@ -365,12 +385,29 @@ contract FlightSuretyApp {
 
     // endregion
 }
-/*
-contract FlightSuretyData {
-    function isAirline(address airlineAddress) public view returns (bool);
 
-    function registerAirline(address airlineAddress) external;
 
-    function countAirlines() public view returns (uint256 count);
+
+interface FlightSuretyData {
+    function isAirline(address airlineAddress) external view returns (address, bool);
+
+    function countAirlines() external view returns (uint256 count);
+
+    function registerFlight(
+        address airlineAddress,
+        string calldata flightCode,
+        uint256 timestamp
+    ) external returns (bytes32);
+    function getAirlineFund(address airlineAddress)
+        external
+        view
+        returns (uint256); 
+    function fund() external payable;  
+    function addAirline(address airlineAddress, uint256 voteCount) external;
+    function creditInsurees(
+        address airlineAddress,
+        string calldata flightNumber,
+        uint256 timestamp
+    ) external;     
 }
-*/
+
