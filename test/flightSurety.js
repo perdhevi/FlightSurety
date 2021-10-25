@@ -115,10 +115,9 @@ contract('Flight Surety Tests', async (accounts) => {
   });
 
   it('airline can register Flight', async() => {
-    await config.flightSuretyData.registerFlight(
-        config.firstAirline,
+    await config.flightSuretyApp.registerFlight(
         'ND101',
-        Date.now());
+        Date.now(), {from:config.firstAirline});
     let address = await config.flightSuretyData.getFlightAirline('ND101');
 
     assert.equal(config.firstAirline == address, true, 'Airlne address should match after registration');

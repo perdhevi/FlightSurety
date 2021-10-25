@@ -263,12 +263,15 @@ contract FlightSuretyData {
     {
         return airlines[airlineAddress].fundDeposit;
     }
-
-    function registerFlight(
+    
+    //returns (bytes32) 
+    function addFlight(
         address airlineAddress,
         string calldata flightCode,
         uint256 timestamp
-    ) external returns (bytes32) {
+    ) external 
+    
+    {
         bytes32 flightKey = getFlightKey(airlineAddress, flightCode, timestamp);
         flights[flightKey] = Flight(airlineAddress, flightCode, timestamp, 0);
         flightKeys[flightCode] = flightKey;
@@ -276,7 +279,7 @@ contract FlightSuretyData {
         FlightInsuree storage fi = insuree[flightCode];
         fi.passengersCount = 0;
 
-        return flightKey;
+        //return flightKey;
     }
 
     function getFlightAirline(string memory flightCode)

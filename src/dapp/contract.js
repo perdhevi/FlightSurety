@@ -78,21 +78,28 @@ export default class Contract {
             });
     }
 
-    registerFlight(flight, callback){
+    registerFlight(flight, airlineAddr, callback) {
         let self = this;
         let payload = {
-            airline: self.airlines[0],
+            airline: airlineAddr,
             flight:flight,
             timestamp:Math.floor(Date.now() / 1000),
         }
+        console.log(payload);
+
         self.flightSuretyApp.methods
             .registerFlight(payload.flight, payload.timestamp)
-            .send({from: payload.airline}, (error, result =>{
+            .send({from: payload.airline, gas:9999999}, (error, result) =>{
                 callback(error, payload);
-            }));
+            });
     }
 
-    passengerBuy(flight, amount, callback){
-
+    passengerBuy(flight, amount, address, callback){
+        let self = this;
+        self.flightSuretyData.methods
+            .buy(flight)
+            .send({from: address, value: amount, gas:9999999}, (error, result) =>{
+                callback(error, result);
+            });
     }
 }

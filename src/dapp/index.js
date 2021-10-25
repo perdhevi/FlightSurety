@@ -18,15 +18,13 @@ import Web3 from 'web3';
             }
             let section = DOM.section();
 
-
             let row = section.appendChild(DOM.div({className:'row'}));
-            row.appendChild(DOM.div({className: 'col-sm-0 field'}, contract.owner));
+            row.appendChild(DOM.div({className: 'col-sm-0 field'}, 'owner '+contract.owner));
             row.appendChild(DOM.div({className: 'col-sm-4 field-value' ,id : 'row-' + contract.owner.toString()}, "-"));
             contract.isAirlineRegister(contract.owner, (error, result) =>{
                 let status = DOM.elid("row-"+result[0].toString());
                 status.textContent = result[1] ? "registered" : "not registered"; 
             })
-            row.appendChild(DOM.button({id : 'airline-register'},"register"));
 
             airlines.map((airline)=>{
                 let row = section.appendChild(DOM.div({className:'row'}));
@@ -36,10 +34,25 @@ import Web3 from 'web3';
                     let status = DOM.elid("row-"+result[0].toString());
                     status.textContent = result[1] ? "registered" : "not registered"; 
                 })
-                row.appendChild(DOM.button({id : 'airline-register'},"register"));
     
             })
             airlinesDiv.append(section)    
+        }
+
+        function listPassengers(passengers){
+            let passengerDiv = DOM.elid("passenger-wrapper");
+            while(passengerDiv.firstChild){
+                passengerDiv.removeChild(passengerDiv.firstChild);
+            }
+
+            let section = DOM.section();
+            passengers.map((passenger)=>{
+                let row = section.appendChild(DOM.div({className:'row'}));
+                row.appendChild(DOM.div({className: 'col-sm-0 field'}, passenger));
+                row.appendChild(DOM.div({className: 'col-sm-4 field-value' ,id : 'row-' + passenger.toString()}, "-"));
+    
+            })
+            passengerDiv.append(section)    
         }
 
 
@@ -50,6 +63,8 @@ import Web3 from 'web3';
         });
 
         listAirlines(contract.airlines);
+        listPassengers(contract.passengers);
+        DOM.elid('executor').value = contract.owner;
 
         // User-submitted transaction
         DOM.elid('submit-oracle').addEventListener('click', () => {
@@ -62,17 +77,25 @@ import Web3 from 'web3';
 
         DOM.elid('register-flight').addEventListener('click', () => {
             let flight = DOM.elid('flight-number').value;
+            let airlineAddr = DOM.elid('airline-operator').value;
             // Write transaction
-            contract.registerFlight(flight, (error, result) => {
+            contract.registerFlight(flight, airlineAddr, (error, result) => {
                 display('Airline', 'Airline register flight', [ { label: 'Fetch Flight Status', error: error, value: result.flight + ' ' + result.timestamp} ]);
             });
 
         });
+        DOM.elid('fund-airline').addEventListener('click', () =>{
+            let airlineAddr = DOM.elid('airline-operator').value;
+            contract.airlineFund(airlineAddr, Web3.utils.toWei("1","ether"), (error, result) => {
+                display('Airline', 'Add Fund', [ { label: 'fund airline', error: error, value: result} ]);
+            });            
+        })
         DOM.elid('buy-insurance').addEventListener('click', () => {
             let flight = DOM.elid('flight-number').value;
-            let amount = DOM.elid('buy-amount').value
-            passengerBuy(flight, amount, (error, result) => {
-                display('Passenger', 'Buy Insurance')
+            let buyAddress = DOM.elid('buy-address').value;
+            let amount = DOM.elid('buy-amount').value;
+            contract.passengerBuy(flight, amount, buyAddress, (error, result) => {
+                display('Passenger', 'Buy Insurance', [ { label: 'Buy Insurance', error: error, value: result} ])
             })
         });
         DOM.elid('first-time').addEventListener('click', () => {
@@ -113,9 +136,6 @@ function display(title, description, results) {
     })
     displayDiv.append(section);
 
-}
-
-function firstTimeInit(){
 }
 
 

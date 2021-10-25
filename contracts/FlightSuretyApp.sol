@@ -100,17 +100,20 @@ contract FlightSuretyApp {
      * @dev Add an airline to the registration queue
      *
      */
-    function registerAirline(address airlineAddress) external returns (bool) {
+    function registerAirline(address airlineAddress) 
+    external 
+    returns (bool) 
+    {
         require(
             flightSuretyData.getAirlineFund(msg.sender) > 0,
             "Registering airline must have fund"
         );
         // flightSuretyData.addAirline(airlineAddress, 0);
         // return true;
-    (address addr, bool status) = flightSuretyData.isAirline(airlineAddress);
-    if (status == true) {
-        return true;
-    } else {
+        (address addr, bool status) = flightSuretyData.isAirline(airlineAddress);
+        if (status == true) {
+            return true;
+        } else {
             uint256 airlineCount = flightSuretyData.countAirlines();
             if (airlineCount <= 4) {
                 flightSuretyData.addAirline(airlineAddress,0);
@@ -129,33 +132,6 @@ contract FlightSuretyApp {
         }
     }
 
-    /*
-        */
-    //if the airline is already registered then just return ok
-    // (address addr, bool status) = flightSuretyData.isAirline(airlineAddress);
-    // if (status == true) {
-    //     return (true, 0);
-    // } else {
-
-    /*
-            uint256 airlineCount = flightSuretyData.countAirlines();
-            if (airlineCount <= 4) {
-                flightSuretyData.addAirline(airlineAddress);
-
-                return (true, 0);
-            } else {
-                votes[airlineAddress]++;
-                //fundDeposited[airlineAddress] = msg.value;
-                if (votes[airlineAddress] > airlineCount.div(2)) {
-                    flightSuretyData.addAirline(airlineAddress);
-                    return (true, 0);
-                } else {
-                    return (false, votes[airlineAddress]);
-                }
-            }
-*/
-    //}
-    //}
 
     function voteAirline(address airlineAddress) external {
         uint256 airlineCount = flightSuretyData.countAirlines();
@@ -168,17 +144,18 @@ contract FlightSuretyApp {
     /**
      * @dev Register a future flight for insuring.
      *  The airline needs to register the flight
+        // returns (bytes32)
      */
     function registerFlight(string calldata flightCode, uint256 timestamp)
         external
-        returns (bytes32)
     {
-        bytes32 flightKey = flightSuretyData.registerFlight(
+        //bytes32 flightKey = 
+        flightSuretyData.addFlight(
             msg.sender,
             flightCode,
             timestamp
         );
-        return flightKey;
+        //return flightKey;
     }
 
     /**
@@ -393,11 +370,11 @@ interface FlightSuretyData {
 
     function countAirlines() external view returns (uint256 count);
 
-    function registerFlight(
+    function addFlight(
         address airlineAddress,
         string calldata flightCode,
         uint256 timestamp
-    ) external returns (bytes32);
+    ) external;// returns (bytes32);
     function getAirlineFund(address airlineAddress)
         external
         view
