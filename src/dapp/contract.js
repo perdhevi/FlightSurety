@@ -102,4 +102,22 @@ export default class Contract {
                 callback(error, result);
             });
     }
+    passengerBalance(address, callback){
+        let self = this;
+        self.flightSuretyData.methods
+            .getInsuranceBalance()
+            .call({from:address}, (error, result)=> {
+                callback(error, result);
+            })
+    }
+
+    passengerWithdraw(address,  callback){
+        let self = this;
+        self.flightSuretyData.methods
+            .pay()
+            .send({from: address, gas:9999999}, (error, result) =>{
+                callback(error, result);
+            });
+    }
+        
 }

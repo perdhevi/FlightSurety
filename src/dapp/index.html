@@ -48,48 +48,56 @@
 
       <div class="top-50">
         <label class="form">
-        <h3>
-          Flight
-        </h3>
-        <div class="row">
-          Airline : <input type="text" id="airline-operator" />
-        </div>
-        <div class="top-50">
-          <div class="row top-20">
-            <btn class="btn btn-primary" id="fund-airline">
-              Fund Airline
-            </btn>
-          </div>
-        </div>
-
-        <div class="top-50">
+          <h3>Flight</h3>
           <div class="row">
-            Flight Number : <input type="text" id="flight-number" />
+            Airline : <input type="text" id="airline-operator" />
+          </div>
+          <div class="top-50">
+            <div class="row top-20">
+              <btn class="btn btn-primary" id="fund-airline">
+                Fund Airline
+              </btn>
+            </div>
+          </div>
+
+          <div class="top-50">
+            <div class="row">
+              Flight Number : <input type="text" id="flight-number" />
+            </div>
+            <div class="row top-20">
+              <btn class="btn btn-primary" id="register-flight">
+                Register Flight
+              </btn>
+            </div>
           </div>
           <div class="row top-20">
-            <btn class="btn btn-primary" id="register-flight">
-              Register Flight
+            <btn class="btn btn-primary" id="submit-oracle">
+              Submit to Oracles
             </btn>
           </div>
-        </div>
-        <div class="row top-20">          
-          <btn class="btn btn-primary" id="submit-oracle">
-            Submit to Oracles
-          </btn>
-        </div>
-      </label>
+        </label>
       </div>
 
       <div class="top-20">
-        
         <label class="form"><h4>Passenger</h4></label>
         <div id="passenger-wrapper"></div>
         <div class="row top-20">
-          <h5>Passenger Address : </h5><input type="text" id="buy-address" />
+          <h5>Passenger Address :</h5>
+          <input type="text" id="buy-address" />
         </div>
         <div class="row top-20">
-            <h5>Amount : </h5><input type="text" id="buy-amount" />
+          <h5>Amount :</h5>
+          <input type="text" id="buy-amount" />
           <btn class="btn btn-primary" id="buy-insurance">Buy Insurance</btn>
+        </div>
+        <div>
+          <div class="row top-20" id="balance">0</div>
+          <btn class="btn btn-primary" id="passenger-balance">
+            Balance Deposit
+          </btn>
+        </div>
+        <div>
+          <btn class="btn btn-primary" id="passenger-withdrawal">Withdraw</btn>
         </div>
       </div>
     </main>

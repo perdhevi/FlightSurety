@@ -237,7 +237,7 @@ contract FlightSuretyData {
         );
 
         uint256 balance = insurances[msg.sender].insuranceFee;
-        insurances[msg.sender].insuranceFee = 0;
+        delete insurances[msg.sender];
         msg.sender.transfer(balance);
     }
 
@@ -263,15 +263,13 @@ contract FlightSuretyData {
     {
         return airlines[airlineAddress].fundDeposit;
     }
-    
-    //returns (bytes32) 
+
+    //returns (bytes32)
     function addFlight(
         address airlineAddress,
         string calldata flightCode,
         uint256 timestamp
-    ) external 
-    
-    {
+    ) external {
         bytes32 flightKey = getFlightKey(airlineAddress, flightCode, timestamp);
         flights[flightKey] = Flight(airlineAddress, flightCode, timestamp, 0);
         flightKeys[flightCode] = flightKey;

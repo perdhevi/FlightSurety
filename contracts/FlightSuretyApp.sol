@@ -5,6 +5,7 @@ pragma solidity ^0.5.0;
 // More info: https://www.nccgroup.trust/us/about-us/newsroom-and-events/blog/2018/november/smart-contract-insecurity-bad-arithmetic/
 
 import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
+
 //import "./FlightSuretyData.sol";
 
 /************************************************** */
@@ -100,30 +101,32 @@ contract FlightSuretyApp {
      * @dev Add an airline to the registration queue
      *
      */
-    function registerAirline(address airlineAddress) 
-    external 
-    returns (bool) 
-    {
+    function registerAirline(address airlineAddress) external returns (bool) {
         require(
             flightSuretyData.getAirlineFund(msg.sender) > 0,
             "Registering airline must have fund"
         );
         // flightSuretyData.addAirline(airlineAddress, 0);
         // return true;
-        (address addr, bool status) = flightSuretyData.isAirline(airlineAddress);
+        (address addr, bool status) = flightSuretyData.isAirline(
+            airlineAddress
+        );
         if (status == true) {
             return true;
         } else {
             uint256 airlineCount = flightSuretyData.countAirlines();
             if (airlineCount <= 4) {
-                flightSuretyData.addAirline(airlineAddress,0);
+                flightSuretyData.addAirline(airlineAddress, 0);
 
                 return true;
             } else {
                 votes[airlineAddress]++;
                 //fundDeposited[airlineAddress] = msg.value;
                 if (votes[airlineAddress] > airlineCount.div(2)) {
-                    flightSuretyData.addAirline(airlineAddress, votes[airlineAddress]);
+                    flightSuretyData.addAirline(
+                        airlineAddress,
+                        votes[airlineAddress]
+                    );
                     return true;
                 } else {
                     return false;
@@ -131,7 +134,6 @@ contract FlightSuretyApp {
             }
         }
     }
-
 
     function voteAirline(address airlineAddress) external {
         uint256 airlineCount = flightSuretyData.countAirlines();
@@ -149,12 +151,8 @@ contract FlightSuretyApp {
     function registerFlight(string calldata flightCode, uint256 timestamp)
         external
     {
-        //bytes32 flightKey = 
-        flightSuretyData.addFlight(
-            msg.sender,
-            flightCode,
-            timestamp
-        );
+        //bytes32 flightKey =
+        flightSuretyData.addFlight(msg.sender, flightCode, timestamp);
         //return flightKey;
     }
 
@@ -363,10 +361,11 @@ contract FlightSuretyApp {
     // endregion
 }
 
-
-
 interface FlightSuretyData {
-    function isAirline(address airlineAddress) external view returns (address, bool);
+    function isAirline(address airlineAddress)
+        external
+        view
+        returns (address, bool);
 
     function countAirlines() external view returns (uint256 count);
 
@@ -374,17 +373,20 @@ interface FlightSuretyData {
         address airlineAddress,
         string calldata flightCode,
         uint256 timestamp
-    ) external;// returns (bytes32);
+    ) external; // returns (bytes32);
+
     function getAirlineFund(address airlineAddress)
         external
         view
-        returns (uint256); 
-    function fund() external payable;  
+        returns (uint256);
+
+    function fund() external payable;
+
     function addAirline(address airlineAddress, uint256 voteCount) external;
+
     function creditInsurees(
         address airlineAddress,
         string calldata flightNumber,
         uint256 timestamp
-    ) external;     
+    ) external;
 }
-

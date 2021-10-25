@@ -111,12 +111,29 @@ import Web3 from 'web3';
                 display('Airline', 'Register Airline', [ { label: 'register airline', error: error, value: result} ]);
         
             });
-                });
+        });
         
         //console.log('listing airlines');
 
-        contract.airlines.map((airline) => {
+        // contract.airlines.map((airline) => {
+        // });
+
+        DOM.elid('passenger-balance').addEventListener('click', () => {
+            let buyAddress = DOM.elid('buy-address').value; 
+            contract.passengerBalance(buyAddress, (error, result)=>{
+                let element = DOM.elid('balance')
+                element.removeChild(element.firstChild);
+                element.appendChild(DOM.div({className: 'col-sm-0 field'}, 'balance '+result))
+            })
         });
+
+        DOM.elid('passenger-withdrawal').addEventListener('click', () => {
+            let buyAddress = DOM.elid('buy-address').value; 
+            contract.passengerWithdraw(buyAddress, (error, result)=>{
+                display('Passenger', 'Passenger Withdrawal', [ { label: 'Passenger Withdraw', error: error, value: result} ]);
+            })
+        });
+
     });
     
 
