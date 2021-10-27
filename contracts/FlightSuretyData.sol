@@ -29,6 +29,7 @@ contract FlightSuretyData {
         string flightCode;
         uint256 timestamp;
         uint8 status;
+        uint8 processed;
     }
     mapping(bytes32 => Flight) private flights;
     mapping(string => bytes32) private flightKeys;
@@ -113,6 +114,13 @@ contract FlightSuretyData {
     modifier requireNotProcessing(address airlineAddress) {
         Airline memory airline = airlines[airlineAddress];
         require(airline.processing == false, "airline is being processed");
+        _;
+    }
+
+    modifier requireFlightNotProcessed(string memory flightNumber) {
+        bytes32 flightKey = flightKeys[flightNumber];
+        Flight memory flight = flights[flightKey];
+        require(flight.processed == 0, "Airline is being processed");
         _;
     }
 
@@ -205,8 +213,15 @@ contract FlightSuretyData {
         address airlineAddress,
         string calldata flightNumber,
         uint256 timestamp
-    ) external requireNotProcessing(airlineAddress) {
+    )
+        external
+        requireNotProcessing(airlineAddress)
+        requireFlightNotProcessed(flightNumber)
+    {
         Airline storage airline = airlines[airlineAddress];
+        bytes32 flightKey = flightKeys[flightNumber];
+        Flight storage flight = flights[flightKey];
+        flight.processed = 1;
         airline.processing = true;
         uint8 count = insuree[flightNumber].passengersCount;
         uint256 totalCredit = 0;
@@ -224,6 +239,7 @@ contract FlightSuretyData {
 
         airline.fundDeposit = airline.fundDeposit - totalCredit;
         airline.processing = false;
+        flight.processed = 2;
     }
 
     /**
@@ -271,7 +287,13 @@ contract FlightSuretyData {
         uint256 timestamp
     ) external {
         bytes32 flightKey = getFlightKey(airlineAddress, flightCode, timestamp);
-        flights[flightKey] = Flight(airlineAddress, flightCode, timestamp, 0);
+        flights[flightKey] = Flight(
+            airlineAddress,
+            flightCode,
+            timestamp,
+            0,
+            0
+        );
         flightKeys[flightCode] = flightKey;
 
         FlightInsuree storage fi = insuree[flightCode];

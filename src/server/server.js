@@ -6,6 +6,13 @@ import express from 'express';
 const TEST_ORACLES_COUNT = 10;
 console.log("flightSurety Oracle Server..")
 
+const STATUS_CODE_UNKNOWN = 0;
+const STATUS_CODE_ON_TIME = 10;
+const STATUS_CODE_LATE_AIRLINE = 20;
+const STATUS_CODE_LATE_WEATHER = 30;
+const STATUS_CODE_LATE_TECHNICAL = 40;
+const STATUS_CODE_LATE_OTHER = 50;
+
 
 let config = Config['localhost'];
 let web3 = new Web3(new Web3.providers.WebsocketProvider(config.url.replace('http', 'ws')));
@@ -63,24 +70,27 @@ flightSuretyApp.events.OracleRequest({
     console.log("events fired ",result);
     console.log('length',oracleAccounts.length);
     oracleAccounts.forEach( function(value, id) {
-      console.log('oracleAccount id :',id);
+      console.log('oracleAccount id :',value.indexes);
       //console.log('oracleAccount result :',indexes);
       if(value.indexes.includes(result.index) ){
-        console.log('submit Oracle response',value);
-        /*
+        console.log('submit Oracle response');
+        let idx = result.index;
         flightSuretyApp.methods
         .submitOracleResponse(
           result.index,
           result.airline,
           result.flight,
           result.timestamp,
-          20       
+          STATUS_CODE_LATE_AIRLINE       
         )
-        .send({from:defAccount, gas:9999999})
-        .then(()=>{
-
+        .send({from:value.address, gas:9999999})
+        .then((result)=>{
+          console.log('submitOracleResponse ');
+        }, err => {
+          console.log('submit error', idx);
+          console.log('submit error', err);
         });
-        */
+        
       }
     });      
   }
