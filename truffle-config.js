@@ -11,7 +11,7 @@ module.exports = {
       network_id: "5777", 
       port: 9545,
       gas: 9999999,
-      accounts: 20
+      accounts: 25 //0 : contract owner, 1-5 flight 6-10 passenger 11-21 oracles
     }
   },
   compilers: {

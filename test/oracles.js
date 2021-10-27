@@ -29,9 +29,9 @@ contract('Oracles', async (accounts) => {
 
     // ACT
     for(let a=1; a<TEST_ORACLES_COUNT; a++) {    
-      console.log("registering ",accounts[a]);  
-      await config.flightSuretyApp.registerOracle({ from: accounts[a], value: fee });
-      let result = await config.flightSuretyApp.getMyIndexes.call({from: accounts[a]});
+      console.log("registering ",accounts[10+a]);  
+      await config.flightSuretyApp.registerOracle({ from: accounts[10+a], value: fee });
+      let result = await config.flightSuretyApp.getMyIndexes.call({from: accounts[10+a]});
       console.log(`Oracle Registered: ${result[0]}, ${result[1]}, ${result[2]}`);
     }
   });
@@ -59,13 +59,13 @@ contract('Oracles', async (accounts) => {
     for(let a=1; a<TEST_ORACLES_COUNT; a++) {
 
       // Get oracle information
-      let oracleIndexes = await config.flightSuretyApp.getMyIndexes.call({ from: accounts[a]});
-      //console.log(oracleIndexes);
+      let oracleIndexes = await config.flightSuretyApp.getMyIndexes.call({ from: accounts[a+10]});
+      console.log('oracleIndex',oracleIndexes);
       for(let idx=0;idx<3;idx++) {
 
         try {
           // Submit a response...it will only be accepted if there is an Index match
-          await config.flightSuretyApp.submitOracleResponse(oracleIndexes[idx], config.firstAirline, flight, timestamp, STATUS_CODE_ON_TIME, { from: accounts[a] });
+          await config.flightSuretyApp.submitOracleResponse(oracleIndexes[idx], config.firstAirline, flight, timestamp, STATUS_CODE_LATE_AIRLINE, { from: accounts[a] });
 
         }
         catch(e) {
