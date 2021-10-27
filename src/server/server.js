@@ -85,7 +85,7 @@ flightSuretyApp.events.OracleRequest({
         )
         .send({from:value.address, gas:9999999})
         .then((result)=>{
-          console.log('submitOracleResponse ');
+          console.log('submitOracleResponse ', idx);
         }, err => {
           console.log('submit error', idx);
           console.log('submit error', err);
