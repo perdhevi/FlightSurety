@@ -219,10 +219,10 @@ contract FlightSuretyData {
         requireFlightNotProcessed(flightNumber)
     {
         Airline storage airline = airlines[airlineAddress];
+        airline.processing = true;
         bytes32 flightKey = flightKeys[flightNumber];
         Flight storage flight = flights[flightKey];
         flight.processed = 1;
-        airline.processing = true;
         uint8 count = insuree[flightNumber].passengersCount;
         uint256 totalCredit = 0;
         for (uint8 idx = 0; idx < count; idx++) {
