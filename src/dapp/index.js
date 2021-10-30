@@ -11,6 +11,7 @@ import Web3 from 'web3';
 
     let contract = new Contract('localhost', () => {
 
+
         function listAirlines(airlines){
             let airlinesDiv = DOM.elid("airline-wrapper");
             while(airlinesDiv.firstChild){
@@ -65,6 +66,12 @@ import Web3 from 'web3';
         listAirlines(contract.airlines);
         listPassengers(contract.passengers);
         DOM.elid('executor').value = contract.owner;
+        DOM.elid('authorizeApp').addEventListener('click', () => {
+            contract.authorizeAppServer((error, result) => {
+                display('Authorize AppServer', 'Authorize App Server', [ { label: 'Authorize caller', error: error, value: result} ]);
+            })
+        });
+
 
         // User-submitted transaction
         DOM.elid('submit-oracle').addEventListener('click', () => {
@@ -103,21 +110,14 @@ import Web3 from 'web3';
                 display('Airline', 'Add Fund', [ { label: 'fund airline', error: error, value: result} ]);
             });
         
-            contract.registerAirline(contract.owner, contract.airlines[0], (error, result) =>{
-                display('Airline', 'Register Airline '+contract.airlines[0].toString(), [ { label: 'register airline', error: error, value: result} ]);
-        
-            });
-            contract.registerAirline(contract.owner, contract.airlines[1], (error, result) =>{
-                display('Airline', 'Register Airline', [ { label: 'register airline', error: error, value: result} ]);
-        
-            });
+             for(let x =0;x<4;x++){
+                contract.registerAirline(contract.owner, contract.airlines[x], (error, result) =>{
+                    display('Airline', 'Register Airline '+contract.airlines[x].toString(), [ { label: 'register airline', error: error, value: result} ]);
+            
+                });
+            }
         });
         
-        //console.log('listing airlines');
-
-        // contract.airlines.map((airline) => {
-        // });
-
         DOM.elid('passenger-balance').addEventListener('click', () => {
             let buyAddress = DOM.elid('buy-address').value; 
             contract.passengerBalance(buyAddress, (error, result)=>{
@@ -151,7 +151,7 @@ function display(title, description, results) {
         row.appendChild(DOM.div({className: 'col-sm-4 field-value'}, result.error ? String(result.error) : String(result.value)));
         section.appendChild(row);
     })
-    displayDiv.append(section);
+    displayDiv.insertBefore(section, displayDiv.firstChild);
 
 }
 

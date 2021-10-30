@@ -13,7 +13,7 @@ import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
 /************************************************** */
 contract FlightSuretyApp {
     using SafeMath for uint256; // Allow SafeMath functions to be called for all uint256 types (similar to "prototype" in Javascript)
-
+    bool private operational = true; // Blocks all state changes throughout the contract if false
     /********************************************************************************************/
     /*                                       DATA VARIABLES                                     */
     /********************************************************************************************/
@@ -55,7 +55,7 @@ contract FlightSuretyApp {
      */
     modifier requireIsOperational() {
         // Modify to call data contract's status
-        require(true, "Contract is currently not operational");
+        require(operational, "Contract is currently not operational");
         _; // All modifiers require an "_" which indicates where the function body will be added
     }
 
@@ -69,6 +69,14 @@ contract FlightSuretyApp {
 
     modifier requireFunds() {
         require(msg.value > 0, "Fund must be provided");
+        _;
+    }
+
+    modifier requireAirlineHaveFund() {
+        require(
+            flightSuretyData.getAirlineFund(msg.sender) >= 10 ether,
+            "Airline needs to provide fund minimum of 10 Eth"
+        );
         _;
     }
 
@@ -91,6 +99,10 @@ contract FlightSuretyApp {
 
     function isOperational() public pure returns (bool) {
         return true; // Modify to call data contract's status
+    }
+
+    function setOperatingStatus(bool mode) external requireContractOwner {
+        operational = mode;
     }
 
     /********************************************************************************************/
@@ -150,6 +162,7 @@ contract FlightSuretyApp {
      */
     function registerFlight(string calldata flightCode, uint256 timestamp)
         external
+        requireAirlineHaveFund
     {
         //bytes32 flightKey =
         flightSuretyData.addFlight(msg.sender, flightCode, timestamp);

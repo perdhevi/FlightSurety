@@ -110,6 +110,10 @@ contract FlightSuretyData {
         require(msg.value > 0, "Value must be provided");
         _;
     }
+    modifier requireLessThan1Ether() {
+        require(msg.value <= 1 ether, "value must be less than 1 ether");
+        _;
+    }
 
     modifier requireNotProcessing(address airlineAddress) {
         Airline memory airline = airlines[airlineAddress];
@@ -163,7 +167,10 @@ contract FlightSuretyData {
      *      Can only be called from FlightSuretyApp contract
      *
      */
-    function addAirline(address airlineAddress, uint256 voteCount) external {
+    function addAirline(address airlineAddress, uint256 voteCount)
+        external
+        requireAuthorizedCaller
+    {
         Airline storage airline = airlines[airlineAddress];
 
         airline.airlineAddress = airlineAddress;
@@ -192,7 +199,12 @@ contract FlightSuretyData {
      * @dev Buy insurance for a flight
      *
      */
-    function buy(string calldata flightNumber) external payable {
+    function buy(string calldata flightNumber)
+        external
+        payable
+        requireValue
+        requireLessThan1Ether
+    {
         bytes32 flightKey = flightKeys[flightNumber];
         insurances[msg.sender] = Insurance(
             msg.sender,
@@ -215,6 +227,7 @@ contract FlightSuretyData {
         uint256 timestamp
     )
         external
+        requireAuthorizedCaller
         requireNotProcessing(airlineAddress)
         requireFlightNotProcessed(flightNumber)
     {
@@ -285,7 +298,7 @@ contract FlightSuretyData {
         address airlineAddress,
         string calldata flightCode,
         uint256 timestamp
-    ) external {
+    ) external requireAuthorizedCaller {
         bytes32 flightKey = getFlightKey(airlineAddress, flightCode, timestamp);
         flights[flightKey] = Flight(
             airlineAddress,

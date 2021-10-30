@@ -3,7 +3,7 @@ import Config from './config.json';
 import Web3 from 'web3';
 import express from 'express';
 
-const TEST_ORACLES_COUNT = 10;
+const TEST_ORACLES_COUNT = 20;
 console.log("flightSurety Oracle Server..")
 
 const STATUS_CODE_UNKNOWN = 0;
@@ -40,7 +40,7 @@ function setAccount(address, idx){
 
 web3.eth.getAccounts((error, accts) => {
   for(var i=0;i<TEST_ORACLES_COUNT;i++){
-    let curAddress = accts[i+11];
+    let curAddress = accts[i+16];
     let curIdx = []
     let curId = i;
     flightSuretyApp.methods
@@ -68,7 +68,6 @@ flightSuretyApp.events.OracleRequest({
     if (error) console.log("event error - ");
     let result = event.returnValues;
     console.log("events fired ",result);
-    console.log('length',oracleAccounts.length);
     oracleAccounts.forEach( function(value, id) {
       console.log('oracleAccount id :',value.indexes);
       //console.log('oracleAccount result :',indexes);
