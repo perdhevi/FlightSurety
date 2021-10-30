@@ -97,7 +97,7 @@ contract('Flight Surety Tests', async (accounts) => {
   });
   
   it('airline can add fund', async() => {
-    let fundValue =100;// web3.utils.toWei("1","ether");
+    let fundValue = web3.utils.toWei("10","ether");
     await config.flightSuretyData.fund({from:config.owner, value:fundValue});
     //console.log('fund Value',fundValue);
     let result = await config.flightSuretyData.getAirlineFund.call(config.owner);
@@ -106,13 +106,40 @@ contract('Flight Surety Tests', async (accounts) => {
   });
 
   it('airline can add register airline', async() => {
-    let airlineAddress = config.testAddresses[4];
+    let airlineAddress = config.firstAirline;
     let addResult = await config.flightSuretyApp.registerAirline(airlineAddress, {from:config.owner});
 
     let result = await config.flightSuretyData.isAirline(airlineAddress);
 
     assert.equal(result[1], true, "Airline can register another airline");
   });
+
+  it('airline can add multiple airline', async() => {
+    let fundValue = web3.utils.toWei("10","ether");
+    await config.flightSuretyData.fund({from:config.firstAirline, value:fundValue});
+    for(let i=2;i<=6;i++){
+      await config.flightSuretyApp.registerAirline(config.testAddresses[i], {from:config.firstAirline})
+    }
+    let result = await config.flightSuretyData.isAirline(config.testAddresses[5]);
+    assert.equal(result[1], false, "Airline needs to be voted after 4");
+  });
+
+  it('airline can vote other airline', async() => {
+    let fundValue = web3.utils.toWei("10","ether");
+    for(let i=2;i<=4;i++){
+      //await config.flightSuretyApp.registerAirline(config.testAddresses[i], {from:config.firstAirline})
+
+      await config.flightSuretyData.fund({from:config.testAddresses[i], value:fundValue});
+    }
+
+    for(let i=2;i<=4;i++){
+      //console.log('voting - ', config.testAddresses[i]);
+      await config.flightSuretyApp.voteAirline(config.testAddresses[5], {from:config.testAddresses[i]});
+    }
+
+    let result = await config.flightSuretyData.isAirline(config.testAddresses[5]);
+    assert.equal(result[1], true, "Voted airline can be added");
+  });  
 
   it('airline can register Flight', async() => {
     await config.flightSuretyApp.registerFlight(

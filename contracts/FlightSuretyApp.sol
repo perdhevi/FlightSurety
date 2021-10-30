@@ -113,13 +113,11 @@ contract FlightSuretyApp {
      * @dev Add an airline to the registration queue
      *
      */
-    function registerAirline(address airlineAddress) external returns (bool) {
-        require(
-            flightSuretyData.getAirlineFund(msg.sender) > 0,
-            "Registering airline must have fund"
-        );
-        // flightSuretyData.addAirline(airlineAddress, 0);
-        // return true;
+    function registerAirline(address airlineAddress)
+        external
+        requireAirlineHaveFund
+        returns (bool)
+    {
         (address addr, bool status) = flightSuretyData.isAirline(
             airlineAddress
         );
@@ -147,7 +145,10 @@ contract FlightSuretyApp {
         }
     }
 
-    function voteAirline(address airlineAddress) external {
+    function voteAirline(address airlineAddress)
+        external
+        requireAirlineHaveFund
+    {
         uint256 airlineCount = flightSuretyData.countAirlines();
         votes[airlineAddress]++;
         if (votes[airlineAddress] > airlineCount.div(2)) {
