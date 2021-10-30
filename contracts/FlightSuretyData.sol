@@ -49,6 +49,8 @@ contract FlightSuretyData {
     }
 
     mapping(string => FlightInsuree) private insuree;
+    mapping(address => uint256) private miscFundAddress;
+    uint256 private miscfund;
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
@@ -112,6 +114,14 @@ contract FlightSuretyData {
     }
     modifier requireLessThan1Ether() {
         require(msg.value <= 1 ether, "value must be less than 1 ether");
+        _;
+    }
+
+    modifier requireAvailableBalance() {
+        require(
+            insurances[msg.sender].insuranceFee > 0,
+            "sender doesn't have any balance in insurance fee"
+        );
         _;
     }
 
@@ -202,6 +212,7 @@ contract FlightSuretyData {
     function buy(string calldata flightNumber)
         external
         payable
+        requireFlightNotProcessed(flightNumber)
         requireValue
         requireLessThan1Ether
     {
@@ -259,12 +270,7 @@ contract FlightSuretyData {
      *  @dev Transfers eligible payout funds to insuree
      *
      */
-    function pay() external payable {
-        require(
-            insurances[msg.sender].insuranceFee > 0,
-            "sender doesn't have any balance in insurance fee"
-        );
-
+    function pay() external payable requireAvailableBalance {
         uint256 balance = insurances[msg.sender].insuranceFee;
         delete insurances[msg.sender];
         msg.sender.transfer(balance);
@@ -332,12 +338,19 @@ contract FlightSuretyData {
         return keccak256(abi.encodePacked(airline, flight, timestamp));
     }
 
+    function withdrawMiscFunds() external payable requireContractOwner {
+        uint256 balance = miscfund;
+        miscfund = 0;
+        msg.sender.transfer(balance);
+    }
+
     /**
      * @dev Fallback function for funding smart contract.
      *
      */
     function() external payable {
-        Airline storage airline = airlines[msg.sender];
-        airline.fundDeposit = airline.fundDeposit.add(msg.value);
+        uint256 curMiscFund = miscFundAddress[msg.sender];
+        miscFundAddress[msg.sender] = curMiscFund.add(msg.value);
+        miscfund = miscfund.add(msg.value);
     }
 }

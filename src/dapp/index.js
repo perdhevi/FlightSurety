@@ -106,14 +106,14 @@ import Web3 from 'web3';
             })
         });
         DOM.elid('first-time').addEventListener('click', () => {
-            contract.airlineFund(contract.owner, Web3.utils.toWei("1","ether"), (error, result) => {
+            contract.airlineFund(contract.owner, Web3.utils.toWei("10","ether"), (error, result) => {
                 display('Airline', 'Add Fund', [ { label: 'fund airline', error: error, value: result} ]);
             });
         
              for(let x =0;x<4;x++){
                 contract.registerAirline(contract.owner, contract.airlines[x], (error, result) =>{
                     display('Airline', 'Register Airline '+contract.airlines[x].toString(), [ { label: 'register airline', error: error, value: result} ]);
-            
+                    listAirlines(contract.airlines);
                 });
             }
         });
