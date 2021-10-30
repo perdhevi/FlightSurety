@@ -84,9 +84,8 @@ flightSuretyApp.events.OracleRequest({
         )
         .send({from:value.address, gas:9999999})
         .then((result)=>{
-          console.log('submitOracleResponse ', idx);
+          console.log('submitOracleResponse ', result);
         }, err => {
-          console.log('submit error', idx);
           console.log('submit error', err);
         });
         
@@ -94,6 +93,12 @@ flightSuretyApp.events.OracleRequest({
     });      
   }
 );
+
+flightSuretyApp.events.FlightStatusInfo({
+  // fromBlock: 0
+ }, function (error, event) {
+   console.log('FlightStatus Info',event);
+ });
 
 const app = express();
 app.get('/api', (req, res) => {
